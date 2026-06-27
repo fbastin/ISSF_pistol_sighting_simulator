@@ -286,6 +286,48 @@ classic coaching rule: it is better to release a shot with a small wobble
 and perfect sight alignment than with the gun frozen on centre but the
 sights misaligned~\cite{nra}.
 
+\subsection{Physical Explanation and Illustration}
+
+\Cref{fig:angvspar} contrasts the two errors.  An alignment error is taken
+over the short sight radius and amplified by $D/b$, while a parallel wobble
+of the correctly aligned assembly is carried to the target unchanged.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth, scale=0.95]
+  % ---- Top: angular (alignment) error ----
+  \begin{scope}
+    \node[anchor=west] at (-0.5,1.55) {\footnotesize\textbf{Alignment (angular) error}};
+    \draw[dashed] (0,0) -- (11,0);
+    \fill (0,0) circle (1.4pt); \node[left] at (0,0) {\scriptsize eye};
+    \draw[thick] (2,-0.35) -- (2,0.35);
+    \draw[thick] (3.5,0) -- (3.5,0.45);
+    \fill[red] (3.5,0.28) circle (1.4pt);
+    \node[red, above left] at (3.5,0.28) {\scriptsize $e$};
+    \draw[thick] (11,-1.25) -- (11,1.25);
+    \draw[red, thick, ->] (0,0) -- (3.5,0.28) -- (11,0.88);
+    \draw[red, <->] (11.25,0) -- (11.25,0.88);
+    \node[red, right] at (11.3,0.5) {\scriptsize $\Delta=\frac{D}{b}\,e$};
+  \end{scope}
+  % ---- Bottom: parallel (wobble) error ----
+  \begin{scope}[yshift=-3.2cm]
+    \node[anchor=west] at (-0.5,1.55) {\footnotesize\textbf{Parallel error (wobble)}};
+    \draw[dashed] (0,0) -- (11,0);
+    \fill (0,0.5) circle (1.4pt); \node[left] at (0,0.5) {\scriptsize eye};
+    \draw[thick] (2,0.15) -- (2,0.85);
+    \draw[thick] (3.5,0.5) -- (3.5,0.95);
+    \draw[thick] (11,-1.25) -- (11,1.25);
+    \draw[blue, thick, ->] (0,0.5) -- (11,0.5);
+    \draw[blue, <->] (11.25,0) -- (11.25,0.5);
+    \node[blue, right] at (11.3,0.27) {\scriptsize $w$};
+  \end{scope}
+\end{tikzpicture}
+\caption{Angular vs.\ parallel error (schematic, not to scale). A front-post
+offset $e$ is amplified to $\Delta=(D/b)\,e$ (top); a parallel wobble $w$ of
+the aligned assembly maps one-to-one to the target (bottom).}
+\label{fig:angvspar}
+\end{figure}
+
 \subsection{Mathematical Model}
 
 The wobble is modelled as a quasi-periodic sum of sinusoids with amplitude
@@ -342,7 +384,32 @@ else.
 Depth of field around the focused plane is finite; planes outside it form
 a blur circle whose diameter grows with the dioptric distance from focus.
 The simulator renders this with a per-plane Gaussian blur (in pixels),
-choosing the front-focus profile as the ``correct'' one:
+choosing the front-focus profile as the ``correct'' one (\cref{fig:focusfig}):
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth, scale=1.0]
+  \fill (0,0) circle (1.5pt); \node[below] at (0,0) {\scriptsize eye};
+  % cone of vision
+  \draw (0,0) -- (8,1.35); \draw (0,0) -- (8,-1.35);
+  % rear notch plane (blurred)
+  \draw[gray!60, line width=2.2pt] (1.5,-0.32) -- (1.5,0.32);
+  \node[gray!60!black, above] at (1.5,0.4) {\scriptsize notch (blurred)};
+  \node[below] at (1.5,-0.4) {\scriptsize $\approx 0.5$ m};
+  % front post plane (sharp)
+  \draw[black, line width=1pt] (3,-0.6) -- (3,0.6);
+  \node[above] at (3,0.66) {\scriptsize \textbf{post (sharp)}};
+  \node[below] at (3,-0.68) {\scriptsize $\approx 0.7$ m};
+  % target plane (blurred, far)
+  \draw[gray!60, line width=2.2pt] (8,-1.35) -- (8,1.35);
+  \node[gray!60!black, above] at (8,1.42) {\scriptsize target (blurred)};
+  \node[below] at (8,-1.42) {\scriptsize $10$--$25$ m};
+\end{tikzpicture}
+\caption{Visual accommodation (schematic, not to scale). The eye focuses on a
+single plane; the front post is kept sharp while the rear notch and the target
+are left blurred.}
+\label{fig:focusfig}
+\end{figure}
 
 \begin{center}
 \begin{tabular}{lccc}
@@ -467,6 +534,39 @@ paradox~\cite{rinker}:
   \Delta y_{\text{cant}} &= (h + y_{\text{drop}})(1-\cos\phi).
 \end{align}
 The alignment error vector \eqref{eq:align} is likewise rotated by $\phi$.
+\Cref{fig:cantfig} shows how the upright sight-height correction, once
+canted, splits into a lateral shift and a vertical loss.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth, scale=1.3]
+  \def\cantang{25}
+  \fill (0,0) circle (1.2pt); \node[below right=1pt] at (0,0) {\scriptsize bore axis};
+  % intended (upright) sight-height vector
+  \draw[dashed, ->] (0,0) -- (0,2);
+  \node[above] at (0,2) {\scriptsize $h$ (upright)};
+  % canted vector
+  \draw[thick, ->] (0,0) -- ({-2*sin(\cantang)},{2*cos(\cantang)});
+  \node[above left] at ({-2*sin(\cantang)},{2*cos(\cantang)}) {\scriptsize $h$ (canted)};
+  % cant angle arc + label
+  \draw (0,1.3) arc (90:115:1.3);
+  \node at (-0.34,1.5) {\scriptsize $\phi$};
+  % guides
+  \draw[dotted] ({-2*sin(\cantang)},{2*cos(\cantang)}) -- ({-2*sin(\cantang)},0);
+  \draw[dotted] ({-2*sin(\cantang)},{2*cos(\cantang)}) -- (2.2,{2*cos(\cantang)});
+  \draw[dotted] (0,2) -- (2.2,2);
+  % lateral shift
+  \draw[red, <->] ({-2*sin(\cantang)},-0.42) -- (0,-0.42);
+  \node[red, below] at ({-1*sin(\cantang)},-0.44) {\scriptsize $h\sin\phi$};
+  % vertical loss
+  \draw[blue, <->] (2.2,{2*cos(\cantang)}) -- (2.2,2);
+  \node[blue, right] at (2.25,{cos(\cantang)+1}) {\scriptsize $h(1-\cos\phi)$};
+\end{tikzpicture}
+\caption{The canting paradox. Tilting the pistol by $\phi$ rotates the upright
+sight-height correction $h$, producing both a lateral shift $h\sin\phi$ and a
+vertical loss $h(1-\cos\phi)$.}
+\label{fig:cantfig}
+\end{figure}
 
 \subsection{Wind}
 

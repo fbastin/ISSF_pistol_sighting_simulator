@@ -329,6 +329,18 @@ classic coaching rule: it is better to release a shot with a small wobble
 and perfect sight alignment than with the gun frozen on centre but the
 sights misaligned[nra].
 
+## Physical Explanation and Illustration
+
+*fig:angvspar* contrasts the two errors.  An alignment error is taken
+over the short sight radius and amplified by $D/b$, while a parallel wobble
+of the correctly aligned assembly is carried to the target unchanged.
+
+<div style="text-align:center;margin:1.5rem 0"><img src="figures/fig_1.svg" alt="Angular vs.\ parallel error (schematic, not to scale). A front-post
+offset $e$ is amplified to $\Delta=(D/b) e$ (top); a parallel wobble $w$ of
+the aligned assembly maps one-to-one to the target (bottom)." style="max-width:100%"><br><em><strong>Figure.</strong> Angular vs.\ parallel error (schematic, not to scale). A front-post
+offset $e$ is amplified to $\Delta=(D/b) e$ (top); a parallel wobble $w$ of
+the aligned assembly maps one-to-one to the target (bottom).</em></div>
+
 ## Mathematical Model
 
 The wobble is modelled as a quasi-periodic sum of sinusoids with amplitude
@@ -382,7 +394,13 @@ else.
 Depth of field around the focused plane is finite; planes outside it form
 a blur circle whose diameter grows with the dioptric distance from focus.
 The simulator renders this with a per-plane Gaussian blur (in pixels),
-choosing the front-focus profile as the “correct” one:
+choosing the front-focus profile as the “correct” one (*fig:focusfig*):
+
+<div style="text-align:center;margin:1.5rem 0"><img src="figures/fig_2.svg" alt="Visual accommodation (schematic, not to scale). The eye focuses on a
+single plane; the front post is kept sharp while the rear notch and the target
+are left blurred." style="max-width:100%"><br><em><strong>Figure.</strong> Visual accommodation (schematic, not to scale). The eye focuses on a
+single plane; the front post is kept sharp while the rear notch and the target
+are left blurred.</em></div>
 
 \begin{center}
 \begin{tabular}{lccc}
@@ -505,6 +523,14 @@ $$
 $$
 
 The alignment error vector \eqref{eq:align} is likewise rotated by $\phi$.
+*fig:cantfig* shows how the upright sight-height correction, once
+canted, splits into a lateral shift and a vertical loss.
+
+<div style="text-align:center;margin:1.5rem 0"><img src="figures/fig_3.svg" alt="The canting paradox. Tilting the pistol by $\phi$ rotates the upright
+sight-height correction $h$, producing both a lateral shift $h\sin\phi$ and a
+vertical loss $h(1-\cos\phi)$." style="max-width:100%"><br><em><strong>Figure.</strong> The canting paradox. Tilting the pistol by $\phi$ rotates the upright
+sight-height correction $h$, producing both a lateral shift $h\sin\phi$ and a
+vertical loss $h(1-\cos\phi)$.</em></div>
 
 ## Wind
 
