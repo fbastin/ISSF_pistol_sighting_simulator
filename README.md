@@ -27,9 +27,22 @@ which covers the aperture (dioptre) sighting system used in precision rifle.
   run the simulator (canvas + control panels). No build step, no dependencies.
 - **`simulator.js`** — the core logic: optics/ballistics model, rendering of the
   sight picture and target face, scoring, and the shot-session statistics.
-- **`docs/`** — written documentation (theory and derivations). *(to be added,
-  generated from a LaTeX source via `tex2html.py`, mirroring the rifle repo.)*
+- **`doc.tex` / `doc.pdf`** — the mathematical/physics reference and user guide
+  (LaTeX source and compiled PDF).
+- **`docs/`** — the same documentation as a single-page navigable HTML site
+  (`docs/index.html`, with SVG figures under `docs/figures/`).
+- **`tex2html.py`** — utility that compiles the TikZ figures and converts
+  `doc.tex` into `docs/index.html`.
 - **`LICENSE`** — MIT.
+
+## Building the documentation
+
+```bash
+pdflatex doc.tex && pdflatex doc.tex   # -> doc.pdf
+python3 tex2html.py                     # -> docs/index.html (+ docs/figures/)
+```
+
+Requires a LaTeX distribution (with `pdflatex` and `dvisvgm`) and Python 3.
 
 ## Running the simulator
 

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISSF Rifle Sighting Simulator — Documentation</title>
+
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']],
+    processEscapes: true
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+:root {
+  --sidebar-w: 280px;
+  --bg: #fafafa;
+  --fg: #222;
+  --accent: #2563eb;
+  --sidebar-bg: #1e293b;
+  --sidebar-fg: #cbd5e1;
+  --sidebar-active: #60a5fa;
+  --border: #e2e8f0;
+  --code-bg: #f1f5f9;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+  overflow-y: auto;
+  padding: 1.5rem 0;
+  z-index: 10;
+  transition: transform .25s;
+}
+#sidebar h2 {
+  font-size: .85rem; text-transform: uppercase; letter-spacing: .08em;
+  padding: 0 1.2rem .8rem; color: #94a3b8; border-bottom: 1px solid #334155;
+  margin-bottom: .6rem;
+}
+#sidebar ul { list-style: none; }
+#sidebar li a {
+  display: block; padding: .45rem 1.2rem;
+  color: var(--sidebar-fg); text-decoration: none;
+  font-size: .92rem; border-left: 3px solid transparent;
+  transition: background .15s, border-color .15s;
+  cursor: pointer;
+}
+#sidebar li a:hover { background: #334155; }
+#sidebar li a.active {
+  color: var(--sidebar-active); border-left-color: var(--sidebar-active);
+  background: rgba(96,165,250,.08);
+}
+
+/* ── Hamburger (mobile) ────────────────────────────────────── */
+#menu-btn {
+  display: none; position: fixed; top: .8rem; left: .8rem;
+  z-index: 20; background: var(--sidebar-bg); color: #fff;
+  border: none; border-radius: 6px; padding: .4rem .6rem;
+  font-size: 1.3rem; cursor: pointer;
+}
+
+/* ── Main ──────────────────────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  max-width: 52rem;
+  padding: 2.5rem 2.5rem 6rem;
+}
+#main h1 { font-size: 1.8rem; margin-bottom: .3rem; }
+#main h2 { font-size: 1.35rem; margin-top: 2rem; margin-bottom: .5rem; border-bottom: 1px solid var(--border); padding-bottom: .3rem; }
+#main h3 { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: .4rem; }
+#main p { margin: .7rem 0; }
+#main ol, #main ul { margin: .5rem 0 .5rem 1.6rem; }
+#main li { margin: .25rem 0; }
+#main blockquote {
+  border-left: 4px solid var(--accent); background: #eff6ff;
+  padding: .7rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0;
+}
+#main table {
+  border-collapse: collapse; margin: 1rem 0; width: 100%;
+  font-size: .93rem;
+}
+#main th, #main td {
+  border: 1px solid var(--border); padding: .4rem .7rem; text-align: left;
+}
+#main th { background: #f1f5f9; font-weight: 600; }
+#main caption {
+  caption-side: top; text-align: left;
+  font-size: .93rem; margin-bottom: .4rem; color: #374151;
+}
+#main pre {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem; overflow-x: auto;
+  font-size: .88rem; line-height: 1.5; margin: 1rem 0;
+}
+#main code {
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  font-size: .9em;
+}
+#main :not(pre) > code {
+  background: var(--code-bg); padding: .15em .35em; border-radius: 4px;
+}
+.MathJax { font-size: 1.05em !important; }
+
+/* ── Nav buttons ───────────────────────────────────────────── */
+#nav-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 3rem; padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+#nav-bar button {
+  background: var(--accent); color: #fff; border: none;
+  padding: .55rem 1.4rem; border-radius: 6px;
+  font-size: .95rem; cursor: pointer; transition: opacity .15s;
+}
+#nav-bar button:hover { opacity: .85; }
+#nav-bar button:disabled { opacity: .35; cursor: default; }
+#nav-bar .page-info { font-size: .85rem; color: #64748b; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #menu-btn { display: block; }
+  #main { margin-left: 0; padding: 2rem 1.2rem 5rem; }
+}
+</style>
+</head>
+<body>
+
+<button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+
+<nav id="sidebar">
+  <h2>Documentation</h2>
+  <ul id="toc"></ul>
+</nav>
+
+<main id="main">
+  <div id="content"></div>
+  <div id="nav-bar">
+    <button id="btn-prev" onclick="go(-1)">&larr; Previous</button>
+    <span class="page-info" id="page-info"></span>
+    <button id="btn-next" onclick="go(1)">Next &rarr;</button>
+  </div>
+</main>
+
+<script type="text/markdown" data-title="Introduction" id="page-0">
+The ISSF Pistol Sighting Simulator is a browser-based pedagogical tool
+that models the optics and physics of *open-sight* (notch-and-post)
+pistol marksmanship, shot one-handed and unsupported (free arm).  Unlike
+the rifle, whose closed aperture (diopter) sight is treated in the
+companion ISSF Rifle Sighting Simulator, the pistol sight picture is a
+three-element alignment: the shooter's eye, the rear-sight notch, and the
+front post, held against the target[issf,nra].
+
+The simulator lets students and athletes isolate, vary, and observe the
+effects that are difficult to separate on the range:
+
+1. **Sight-alignment (angular) error**—how a small
+        displacement of the front post within the rear notch is amplified
+        into a large miss downrange (*sec:align*).
+2. **Arm sway (wobble)**—why a *parallel* movement of the
+        whole pistol hurts far less than a constant alignment error
+        (*sec:wobble*).
+3. **Visual accommodation**—why the eye can focus on only one
+        plane and must focus on the front sight (*sec:focus*).
+4. **Hold**—the six-o'clock (sub-six) hold versus the centre
+        hold (*sec:hold*).
+5. **Mechanical sight adjustment**—how rear-sight clicks
+        translate into impact shifts (*Mechanical Sight Adjustment (Clicks)*).
+6. **Exterior effects**—gravity, cant, and wind
+        (*sec:exterior*).
+
+Each phenomenon is developed in its own section with the
+competitive-shooting context, a physical explanation, a mathematical
+derivation, a reference to the implementing JavaScript code, and
+suggested exercises with the simulator.
+</script>
+<script type="text/markdown" data-title="User Manual" id="page-1">
+## Running the Simulator
+
+Open `index.html` in any modern web browser. No build step or
+dependency is required; all logic lives in `simulator.js` and runs
+client-side on an HTML5 canvas. On \href{https://www.tireur.org}{tireur.org}
+the simulator is embedded through a PHP wrapper that supplies the same
+control panel and loads `simulator.js`.
+
+## Interface Layout
+
+The canvas is split into two viewports:
+
+- **Left — sight picture.**  The shooter's view of the rear
+        notch, the front post, and the target.  A CSS blur is applied per
+        plane to simulate visual accommodation (*sec:focus*).
+- **Right — target face.**  The scoring rings, the aiming
+        mark, and the predicted/served shots.
+
+Below the canvas, control panels expose the target and aiming
+zone, the wobble and wind, the sight alignment, and the mechanical
+adjustments, together with a shot table and session statistics (average,
+last shot, dispersion).
+
+## Controls Reference
+
+The on-screen panels drive the simulator.  When the canvas has focus
+(mouse over it), the following keyboard shortcuts are also available:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+**Input** & **Action**\\
+\midrule
+**A** / **D** & Horizontal alignment error $\mp/\pm 0.02$ mm (0.05 with **Shift**)\\
+**W** / **S** & Vertical alignment error $\mp/\pm 0.02$ mm\\
+**Z** / **X** & Firearm cant $\mp/\pm 0.5^\circ$\\
+**Space** & Fire a shot\\
+**R** & Reset the sights\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+## Quick-Start Walkthrough
+
+1. Open the simulator; the default view is a 10 m air-pistol sight
+        picture with the sights perfectly aligned.
+2. Set the focus to *Target sharp, sights blurred* and note how
+        alignment becomes impossible to judge—the classic beginner error.
+3. Introduce a small alignment error (**A**/**D**) and fire
+        (**Space**); observe how the error is amplified on the card.
+4. Compare with wobble alone (preset *Confirmed*, sights aligned):
+        the impact stays much closer to centre.
+5. Switch to the 25 m target and raise the wind to see the drift grow.
+</script>
+<script type="text/markdown" data-title="Sight-Alignment (Angular) Error" id="page-2">
+## The Issue for Competitive Shooters
+
+On an open-sight pistol the shooter aligns the front post inside the rear
+notch (equal light on either side, tops level) and holds that assembly on
+the target.  A small lateral or vertical displacement of the post within
+the notch is a tiny angular error of the wrist—but, projected to the
+target, it becomes a large miss.
+
+## Why It Matters
+
+Sight alignment dominates pistol accuracy because the *sight radius*
+$b$ (the distance between the rear notch and the front post) is short
+compared with the range $D$.  The lever arm $D/b$ multiplies every
+alignment error.  This is the single most important reason a pistol is
+harder to shoot than a rifle of equal intrinsic precision[nra].
+
+## Physical Explanation and Illustration
+
+*fig:align* shows the geometry.  An offset $e$ of the front post
+relative to the line through the eye and the rear notch subtends an angle
+$\theta \approx e/b$.  The same angle, carried to the target at range
+$D$, produces a displacement
+
+$$
+\Delta  =  D \tan\theta  \approx  \frac{D}{b} e .
+$$
+
+<div style="text-align:center;margin:1.5rem 0"><img src="figures/fig_0.svg" alt="Sight-alignment error. A front-post offset $e$ over the short
+sight radius $b$ is amplified to $\Delta \approx (D/b) e$ at the target." style="max-width:100%"><br><em><strong>Figure.</strong> Sight-alignment error. A front-post offset $e$ over the short
+sight radius $b$ is amplified to $\Delta \approx (D/b) e$ at the target.</em></div>
+
+## Mathematical Model
+
+With sight radius $b$ and range $D$, a small-angle approximation gives the
+target displacement from an alignment error $\mathbf{e}=(e_x,e_y)$:
+
+$$
+\Delta_x  =  \frac{D}{b} e_x, \qquad
+  \Delta_y  =  \frac{D}{b} e_y .
+$$
+
+For the defaults $b = 220$ mm and $D = 10 000$ mm, the gain is
+$D/b \approx 45.5$: an alignment error of only $0.1$ mm becomes
+$\approx 4.5$ mm on the card.  At $D=25 000$ mm the same $0.1$ mm becomes
+$\approx 11.4$ mm.
+
+## Implementation
+
+“`javascript
+const distScale = activeTarget.distance_mm / L_SIIGHT_RADIUS_MM; // D / b
+const alignmentShiftX = alignErrX * distScale;
+const alignmentShiftY = alignErrY * distScale;
+“`
+
+The alignment vector is then rotated by the cant angle (*sec:exterior*)
+before being added to the impact point.
+
+## Simulator Exercises
+
+1. Set the alignment error to $0.1$ mm horizontally and read the
+        target shift; verify it matches $D/b \times 0.1$ mm.
+2. Switch from 10 m to 25 m and confirm the same alignment error
+        now costs more than twice as many millimetres.
+</script>
+<script type="text/markdown" data-title="Arm Sway (Wobble): Angular vs.\ Parallel Error" id="page-3">
+## The Issue for Competitive Shooters
+
+Held at arm's length with one hand, the pistol never stops moving.  This
+*wobble area* is a *parallel* displacement of the whole sight
+system relative to the target: the sights stay aligned, but the aligned
+assembly drifts over the aiming mark.
+
+## Why It Matters
+
+A parallel error maps *one-to-one* onto the target (gain $1$), whereas
+an alignment error is amplified by $D/b$ (*eq:align*).  Hence the
+classic coaching rule: it is better to release a shot with a small wobble
+and perfect sight alignment than with the gun frozen on centre but the
+sights misaligned[nra].
+
+## Mathematical Model
+
+The wobble is modelled as a quasi-periodic sum of sinusoids with amplitude
+set by the stability preset.  Writing $A$ for the preset scale, the
+displacement is
+
+$$
+\begin{aligned}w_x(t) &= 2A\big[0.60\sin(1.1 t) + 0.35\sin(0.35 t) + 0.05\cos(2.1 t)\big],\\
+  w_y(t) &= 2A\big[0.50\cos(0.9 t) + 0.40\sin(0.45 t) + 0.10\sin(1.8 t)\big],\end{aligned}
+$$
+
+which the aiming point inherits directly, $a_{x,y} = m_{x,y} + w_{x,y}$,
+with no $D/b$ amplification. The presets are $A=0$ (bench), $2$ (expert),
+$5$ (confirmed), and $10$ (beginner), in millimetre scale.
+
+## Implementation
+
+“`javascript
+const baseAmp = wobbleAmp * 2.0;
+wobbleX = baseAmp * (Math.sin(wobbleTime*1.1)*0.6 + Math.sin(wobbleTime*0.35)*0.35 + Math.cos(wobbleTime*2.1)*0.05);
+wobbleY = baseAmp * (Math.cos(wobbleTime*0.9)*0.5 + Math.sin(wobbleTime*0.45)*0.4 + Math.sin(wobbleTime*1.8)*0.1);
+“`
+
+## Simulator Exercises
+
+1. With the *Beginner* preset and perfect alignment, fire ten
+        shots and note the group size; it reflects the wobble amplitude
+        almost directly.
+2. Repeat with a fixed $0.1$ mm alignment error and the *bench*
+        preset: the group is tight but badly off-centre—the amplified
+        angular error.
+</script>
+<script type="text/markdown" data-title="Visual Accommodation (Front-Sight Focus)" id="page-4">
+## The Issue for Competitive Shooters
+
+The eye can sharply focus on only one plane at a time.  Three planes
+compete for focus: the rear notch ($\approx 0.5$ m), the front post
+($\approx 0.7$ m), and the target ($10$–$25$ m).  Beginners instinctively
+focus on the target; experts focus on the *front sight*.
+
+## Why It Matters
+
+Sight-alignment error (*sec:align*) can only be judged if the front
+post and notch are sharp.  Focusing on the target blurs the sights and
+makes alignment guesswork, reintroducing the most heavily amplified error
+of all.  A sharp front sight is therefore the prerequisite for everything
+else.
+
+## Physical Explanation
+
+Depth of field around the focused plane is finite; planes outside it form
+a blur circle whose diameter grows with the dioptric distance from focus.
+The simulator renders this with a per-plane Gaussian blur (in pixels),
+choosing the front-focus profile as the “correct” one:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+**Focus** & **Front post** & **Rear notch** & **Target**\\
+\midrule
+Front (correct)   & 0   & 1.5 & 8\\
+Target (error)    & 6   & 9   & 0\\
+Rear              & 2.5 & 0   & 9\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+## Implementation
+
+“`javascript
+function getBlurFilters() {
+  if (focusType === "front")  return { front: 0,   rear: 1.5, target: 8 };
+  if (focusType === "target") return { front: 6,   rear: 9,   target: 0 };
+  return { front: 2.5, rear: 0, target: 9 }; // rear focus
+}
+“`
+
+## Simulator Exercises
+
+Cycle through the three focus modes while holding a small alignment error.
+Only in front-focus is the misalignment clearly visible—demonstrating why
+the front sight must stay sharp.
+</script>
+<script type="text/markdown" data-title="Hold: Six-O'Clock vs.\ Centre" id="page-5">
+## The Issue for Competitive Shooters
+
+Two holds are common in precision pistol.  In the *six-o'clock* (or
+sub-six) hold the shooter places the front post just under the black bull,
+leaving a thin band of white; the sights are zeroed so the bullet still
+strikes the centre.  In the *centre* hold the point of aim equals the
+point of impact.
+
+## Why It Matters
+
+A black front post against a black bull is hard to align precisely.  The
+six-o'clock hold detaches the post from the bull against a white
+background, sharpening the alignment and elevation judgment.  The trade-off
+is sensitivity to changes in light and bull size.
+
+## Mathematical Model
+
+The six-o'clock hold offsets the aiming mark below centre by the bull
+radius plus a small white margin, $h_{\text{hold}} = r_{\text{black}} + 6$ mm,
+and the sight zero adds the same amount back, so a correctly aligned shot
+lands at the centre:
+
+$$
+m_y^{(0)} = - h_{\text{hold}}, \qquad
+  \text{zero offset} = + h_{\text{hold}} .
+$$
+
+## Implementation
+
+“`javascript
+const holdOffset_zero = (holdType === "6oclock")
+                        ? (activeTarget.black_r + 6.0) : 0.0;
+// aim point default: mouseAimY = -(black_r + 6.0) for the six-o'clock hold
+“`
+</script>
+<script type="text/markdown" data-title="Mechanical Sight Adjustment (Clicks)" id="page-6">
+## The Issue for Competitive Shooters
+
+The rear sight is adjustable in windage and elevation by detented clicks.
+A target-pistol click is typically $0.1$ mrad, moving the zero by a fixed,
+range-dependent amount.
+
+## Mathematical Model
+
+For an angular click value $\delta = 0.1$ mrad and range $D$, one click
+moves the impact by $D \delta$:
+
+$$
+\Delta_{\text{click}} = D \delta \approx
+  \begin{cases}
+    1.0 \text{mm} & D = 10 \text{m},\\
+    2.5 \text{mm} & D = 25 \text{m}.
+  \end{cases}
+$$
+
+A positive windage click moves the impact right; a positive elevation
+click moves it up.
+
+## Implementation
+
+“`javascript
+const clickX_mm = clicksX * activeTarget.click_value_mm;
+const clickY_mm = clicksY * activeTarget.click_value_mm;
+“`
+</script>
+<script type="text/markdown" data-title="Exterior Effects: Gravity, Cant, and Wind" id="page-7">
+## Gravity
+
+The projectile falls under gravity during its time of flight $t = D/v$.
+The drop is[mccoy]
+
+$$
+y_{\text{drop}} = \tfrac{1}{2} g t^2 = \tfrac{1}{2} g\left(\frac{D}{v}\right)^2 .
+$$
+
+The sights are zeroed for this drop, so it matters only through the cant
+interaction below.  With $v=175$ m/s at 10 m the drop is a fraction of a
+millimetre; with $v=330$ m/s at 25 m it is a few millimetres.
+
+## Cant
+
+Tilting the pistol by an angle $\phi$ about the bore rotates the sight
+correction (sight height $h$ plus zeroed drop) out of the vertical,
+producing *both* a lateral shift and a vertical loss—the canting
+paradox[rinker]:
+
+$$
+\begin{aligned}\Delta x_{\text{cant}} &= (h + y_{\text{drop}})\sin\phi,\\
+  \Delta y_{\text{cant}} &= (h + y_{\text{drop}})(1-\cos\phi).\end{aligned}
+$$
+
+The alignment error vector \eqref{eq:align} is likewise rotated by $\phi$.
+
+## Wind
+
+Only the crosswind (lateral) component deflects the bullet appreciably at
+pistol ranges.  With wind speed $w$ from clock direction $\varphi$
+($\varphi = 90^\circ$ from the right) and a range-dependent factor $k$,
+
+$$
+\Delta x_{\text{wind}} = - w k \sin\varphi, \qquad \Delta y_{\text{wind}} = 0,
+$$
+
+with $k = 0.5$ mm/(m/s) at 10 m and $1.5$ mm/(m/s) at 25 m.
+
+## Total Impact
+
+Collecting all terms, the impact point (mm from centre) is
+
+$$
+\begin{aligned}X &= a_x + \Delta_x^{\text{align}} + \Delta x_{\text{cant}} + \Delta x_{\text{wind}} + \Delta_x^{\text{click}},\\
+  Y &= a_y + \Delta_y^{\text{align}} - \Delta y_{\text{cant}} + h_{\text{hold}} + \Delta_y^{\text{click}},\end{aligned}
+$$
+
+where $a_{x,y}$ is the aim point including wobble.
+</script>
+<script type="text/markdown" data-title="Scoring Model" id="page-8">
+## ISSF Decimal Scoring
+
+The score is a function of the radial distance $\rho = \sqrt{X^2+Y^2}$ of
+the shot centre from the target centre, interpolated linearly within each
+ring so that a decimal value $1.0$–$10.9$ is produced; the innermost zone
+is the *inner ten* (“mouche”).  Ring spacing is $8$ mm at 10 m and
+$25$ mm at 25 m.
+
+## Implementation
+
+“`javascript
+const dist = Math.hypot(x_mm, y_mm);
+// 10 m: inner ten within 2.5 mm; rings every 8 mm
+const ringIndex = Math.floor((dist - 5.75) / 8.0);
+const fraction  = (dist - (5.75 + ringIndex*8.0)) / 8.0;
+return { score: Math.max(1.0, 9.9 - ringIndex - fraction), isMouche: false };
+“`
+</script>
+<script type="text/markdown" data-title="Implementation Notes" id="page-9">
+## Coordinate System
+
+All physical quantities are in millimetres on the target plane; the origin
+is the target centre, $x$ to the right and $y$ upward.  The left viewport
+draws the sight picture at `PX\_PER\_MM\_SIGHT = 25` px/mm; the right
+viewport draws the target face at the per-target `scale\_right`.
+
+## Physical Constants and Defaults
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+**Symbol** & **Code** & **Default**\\
+\midrule
+Sight radius $b$ & `L\_SIIGHT\_RADIUS\_MM` & 220 mm\\
+Sight height $h$ & `sightHeightOffset` & 45 mm\\
+Click value $\delta$ & `click\_value\_mm` & 1.0 / 2.5 mm\\
+Wind factor $k$ & `wind\_factor` & 0.5 / 1.5 mm/(m/s)\\
+Muzzle velocity $v$ & `muzzle\_velocity\_mps` & 175 / 330 m/s\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The identifier `L\_SIIGHT\_RADIUS\_MM` retains its original
+(misspelled) spelling from the source for fidelity to the code.
+
+\begin{thebibliography}{9}
+
+\bibitem{issf}
+  International Shooting Sport Federation,
+  *ISSF Official Statutes, Rules and Regulations*,
+  ISSF, 2024 edition.
+
+\bibitem{nra}
+  National Rifle Association,
+  *NRA Guide to Pistol Marksmanship*,
+  NRA Publications, 2014.
+
+\bibitem{mccoy}
+  R. L. McCoy,
+  *Modern Exterior Ballistics*,
+  2nd ed. Schiffer Publishing, 2012.
+  ISBN 978-0-7643-3825-0.
+
+\bibitem{rinker}
+  R. A. Rinker,
+  *Understanding Firearm Ballistics*,
+  6th ed. Mulberry House Publishing, 2005.
+  ISBN 978-0-9645598-3-4.
+
+\end{thebibliography}
+</script>
+<script type="text/markdown" data-title="References" id="page-10">
+# References
+
+- **[issf]** International Shooting Sport Federation, *ISSF Official Statutes, Rules and Regulations*, ISSF, 2024 edition.
+- **[nra]** National Rifle Association, *NRA Guide to Pistol Marksmanship*, NRA Publications, 2014.
+- **[mccoy]** R. L. McCoy, *Modern Exterior Ballistics*, 2nd ed. Schiffer Publishing, 2012. ISBN 978-0-7643-3825-0.
+- **[rinker]** R. A. Rinker, *Understanding Firearm Ballistics*, 6th ed. Mulberry House Publishing, 2005. ISBN 978-0-9645598-3-4.
+</script>
+
+<script>
+const pageEls = document.querySelectorAll('script[type="text/markdown"]');
+const pages = Array.from(pageEls).map(el => ({
+  title: el.dataset.title,
+  md: el.textContent
+}));
+
+let cur = 0;
+
+function render(i) {
+  cur = i;
+  const html = marked.parse(pages[i].md);
+  document.getElementById('content').innerHTML = '<h1>' + pages[i].title + '</h1>\n' + html;
+
+  if (window.MathJax && MathJax.typeset) {
+    MathJax.typesetClear();
+    MathJax.typeset();
+  }
+
+  document.querySelectorAll('#toc a').forEach((a, j) => {
+    a.classList.toggle('active', j === i);
+  });
+
+  document.getElementById('btn-prev').disabled = (i === 0);
+  document.getElementById('btn-next').disabled = (i === pages.length - 1);
+  document.getElementById('page-info').textContent = (i+1) + ' / ' + pages.length;
+
+  window.scrollTo(0, 0);
+  location.hash = '#' + i;
+
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function go(delta) {
+  const next = cur + delta;
+  if (next >= 0 && next < pages.length) render(next);
+}
+
+// build TOC
+const toc = document.getElementById('toc');
+pages.forEach((p, i) => {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.textContent = p.title;
+  a.onclick = () => render(i);
+  li.appendChild(a);
+  toc.appendChild(li);
+});
+
+// keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft' && e.altKey) go(-1);
+  if (e.key === 'ArrowRight' && e.altKey) go(1);
+});
+
+// initial page from hash
+const initPage = parseInt(location.hash.slice(1)) || 0;
+render(Math.min(initPage, pages.length - 1));
+</script>
+</body>
+</html>
