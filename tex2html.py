@@ -461,7 +461,7 @@ HTML_TEMPLATE = '''\
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ISSF Rifle Sighting Simulator — Documentation</title>
+<title>ISSF Pistol Sighting Simulator — Documentation</title>
 
 <script>
 MathJax = {{
@@ -473,8 +473,8 @@ MathJax = {{
   options: {{ skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }}
 }};
 </script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="vendor/mathjax/tex-chtml.js" async></script>
+<script src="vendor/marked/marked.min.js"></script>
 
 <style>
 :root {{
