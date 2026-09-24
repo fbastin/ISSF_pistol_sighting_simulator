@@ -1,5 +1,40 @@
 // --- Pistol Sighting Simulator (Tireur.org) ---
 
+// Libellés du canevas et de la liste des tirs, en français et en anglais. La page hôte
+// peut fixer la langue avant de charger ce script (SIMULATOR_LANG = "fr" | "en") puis la
+// changer en réaffectant `lang` : le canevas se redessine à chaque image.
+const I18N = {
+  fr: {
+    sightTitle: "1. VISÉE (HAUSSE & GUIDON)", targetTitle: "2. CIBLE ET IMPACTS",
+    front: "GUIDON", rearClicks: "HAUSSE CLICS", right: "D", left: "G", up: "H", down: "B",
+    cant: "INCLINAISON", hold: "VISÉE", hold6: "Sous visuel (6h)", holdCenter: "Plein Centre",
+    score: "SCORE VIRTUEL INSTANTANÉ",
+    keys: "Clavier : Z/X (inclinaison) | WASD (alignement fin) | Espace (tir)",
+    noShots: "Aucun tir effectué", shot: "Tir {n} : ", inner: "Mouche"
+  },
+  en: {
+    sightTitle: "1. SIGHT PICTURE (REAR & FRONT)", targetTitle: "2. TARGET AND HITS",
+    front: "FRONT SIGHT", rearClicks: "REAR SIGHT CLICKS", right: "R", left: "L", up: "U", down: "D",
+    cant: "CANT", hold: "HOLD", hold6: "6 o'clock", holdCenter: "Centre",
+    score: "INSTANT VIRTUAL SCORE",
+    keys: "Keyboard: Z/X (cant) | WASD (fine alignment) | Space (fire)",
+    noShots: "No shots fired", shot: "Shot {n}: ", inner: "Inner ten"
+  }
+};
+let lang = (typeof SIMULATOR_LANG !== "undefined" && I18N[SIMULATOR_LANG]) ? SIMULATOR_LANG : "fr";
+const t = (k) => (I18N[lang] || I18N.fr)[k];
+
+// Cartouche de titre dimensionné sur son texte (les libellés anglais sont plus longs).
+function drawLabel(text, x) {
+  ctx.font = "bold 10px sans-serif";
+  ctx.textAlign = "left";
+  const w = ctx.measureText(text).width + 16;
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(x, 10, w, 25);
+  ctx.fillStyle = "#fff";
+  ctx.fillText(text, x + 8, 26);
+}
+
 const canvas = document.getElementById("pistolCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -429,11 +464,7 @@ function drawLeftViewport(state) {
   ctx.restore(); // end clip
   
   // Draw visual label/overlay
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(10, 10, 150, 25);
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 10px sans-serif";
-  ctx.fillText("1. VISÉE (HAUSSE & GUIDON)", 18, 26);
+  drawLabel(t("sightTitle"), 10);
 }
 
 function getBlurFilters() {
@@ -562,11 +593,7 @@ function drawRightViewport(state) {
   ctx.restore(); // end clip
   
   // Draw visual label/overlay
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(split + 10, 10, 160, 25);
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 10px sans-serif";
-  ctx.fillText("2. CIBLE ET IMPACTS", split + 18, 26);
+  drawLabel(t("targetTitle"), split + 10);
 }
 
 function drawWindIndicator() {
@@ -618,19 +645,19 @@ function drawBottomPanel(state) {
   const activeTarget = TARGETS[targetKey];
   const curScore = calculateScore(state.impactX, state.impactY).score;
   
-  ctx.fillText(`GUIDON: ${alignErrX > 0 ? "+" : ""}${alignErrX.toFixed(2)} mm (X) | ${alignErrY > 0 ? "+" : ""}${alignErrY.toFixed(2)} mm (Y)`, 20, H - 40);
-  ctx.fillText(`HAUSSE CLICS: ${clicksX > 0 ? "D" : "G"}${Math.abs(clicksX)} | ${clicksY > 0 ? "H" : "B"}${Math.abs(clicksY)}`, 20, H - 20);
+  ctx.fillText(`${t("front")}: ${alignErrX > 0 ? "+" : ""}${alignErrX.toFixed(2)} mm (X) | ${alignErrY > 0 ? "+" : ""}${alignErrY.toFixed(2)} mm (Y)`, 20, H - 40);
+  ctx.fillText(`${t("rearClicks")}: ${clicksX > 0 ? t("right") : t("left")}${Math.abs(clicksX)} | ${clicksY > 0 ? t("up") : t("down")}${Math.abs(clicksY)}`, 20, H - 20);
   
   ctx.fillStyle = "#3498db";
-  ctx.fillText(`DIST: ${activeTarget.distance_mm / 1000}m | INCLINAISON: ${cantDeg.toFixed(1)}°`, 380, H - 40);
-  ctx.fillText(`VISÉE: ${holdType === "6oclock" ? "Sous visuel (6h)" : "Plein Centre"}`, 380, H - 20);
+  ctx.fillText(`DIST: ${activeTarget.distance_mm / 1000}m | ${t("cant")}: ${cantDeg.toFixed(1)}°`, 380, H - 40);
+  ctx.fillText(`${t("hold")}: ${holdType === "6oclock" ? t("hold6") : t("holdCenter")}`, 380, H - 20);
   
   ctx.fillStyle = "#e74c3c";
-  ctx.fillText(`SCORE VIRTUEL INSTANTANÉ: ${curScore.toFixed(1)}`, 680, H - 40);
+  ctx.fillText(`${t("score")}: ${curScore.toFixed(1)}`, 680, H - 40);
   
   ctx.fillStyle = "#888";
   ctx.font = "11px sans-serif";
-  ctx.fillText("Contrôles clavier: Z/X(Inclinaison) | WASD(Micro-alignement) | Espace(Tirer)", 680, H - 20);
+  ctx.fillText(t("keys"), 680, H - 20);
 }
 
 // --- Interaction Logic & Actions ---
@@ -678,7 +705,7 @@ function updateDashboard() {
     avgEl.innerText = "--";
     lastEl.innerText = "--";
     dispEl.innerText = "--";
-    shotsListEl.innerHTML = "<li class='empty-list'>Aucun tir effectué</li>";
+    shotsListEl.innerHTML = "<li class='empty-list'>" + t("noShots") + "</li>";
     return;
   }
   
@@ -705,7 +732,7 @@ function updateDashboard() {
   let html = "";
   for (let i = shots.length - 1; i >= 0; i--) {
     const s = shots[i];
-    html += `<li>Tir ${i + 1} : <strong style="color:var(--color-accent)">${s.score.toFixed(1)}</strong>${s.isMouche ? " <span class='mouche-badge' title='Mouche'>M</span>" : ""}</li>`;
+    html += `<li>${t("shot").replace("{n}", i + 1)}<strong style="color:var(--color-accent)">${s.score.toFixed(1)}</strong>${s.isMouche ? (" <span class='mouche-badge' title='" + t("inner") + "'>M</span>") : ""}</li>`;
   }
   shotsListEl.innerHTML = html;
 }
